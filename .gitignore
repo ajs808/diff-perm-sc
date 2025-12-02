@@ -1,1 +1,17 @@
 data/*
+.env
+indexes/
+*.index.pkl
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+env/
+ENV/
+.venv
+*.egg-info/
+dist/
+build/
+.cache/

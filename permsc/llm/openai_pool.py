@@ -7,9 +7,25 @@ import time
 from typing import List, Type, Any
 
 import openai
-from openai import ChatCompletion, InvalidRequestError
-from openai.api_resources.abstract.engine_api_resource import EngineAPIResource
 from tqdm import tqdm
+
+try:
+    from openai import ChatCompletion
+    from openai.api_resources.abstract.engine_api_resource import EngineAPIResource
+except ImportError:
+    ChatCompletion = None
+    EngineAPIResource = None
+
+try:
+    from openai import InvalidRequestError
+except ImportError:
+    try:
+        from openai.error import InvalidRequestError
+    except ImportError:
+        try:
+            from openai import BadRequestError as InvalidRequestError
+        except ImportError:
+            InvalidRequestError = Exception
 
 
 @dataclass
