@@ -1,4 +1,4 @@
-numpy
+numpy<2.0
 pandas
 pydantic
 nltk
@@ -9,6 +9,7 @@ numba
 pulp
 editdistance
 pyserini
+faiss-cpu
 sentence-transformers
 torch
 scikit-learn
