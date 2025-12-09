@@ -174,9 +174,9 @@ def parse_args():
     parser.add_argument(
         '--aggregator',
         type=str,
-        choices=['kemeny', 'rrf', 'diff_psc'],
+        choices=['kemeny', 'rrf', 'diff_psc', 'tideman'],
         default='kemeny',
-        help='Aggregation method: kemeny, rrf, or diff_psc (default: kemeny)'
+        help='Aggregation method: kemeny, rrf, diff_psc, or tideman (default: kemeny)'
     )
     parser.add_argument(
         '--output-dir',

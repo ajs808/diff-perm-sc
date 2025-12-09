@@ -8,3 +8,5 @@ try:
 except ImportError:
     DiffPSCAggregator = None
 
+from .tideman import TidemanRankedPairsAggregator
+

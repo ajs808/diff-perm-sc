@@ -8,7 +8,7 @@ from ..data import RankingExample, Item
 from ..llm.prompt_builder import RelevanceRankingPromptBuilder
 from ..llm.prompt_pipeline import OpenAIPromptPipeline
 from ..llm.openai_pool import ChatCompletionPool, OpenAIConfig
-from ..aggregator import KemenyOptimalAggregator, RRFRankAggregator
+from ..aggregator import KemenyOptimalAggregator, RRFRankAggregator, TidemanRankedPairsAggregator
 try:
     from ..aggregator import DiffPSCAggregator
 except ImportError:
@@ -32,7 +32,7 @@ class RetrievalPipeline:
             collection: MS MARCO collection for retrieving passage text
             llm_config: Optional OpenAI config for LLM reranking. If None or no API key, reranking is skipped.
             num_permutations: Number of permutations for self-consistency (default: 5)
-            aggregator: Aggregation method ('kemeny', 'rrf', or 'diff_psc', default: 'kemeny')
+            aggregator: Aggregation method ('kemeny', 'rrf', 'diff_psc', or 'tideman', default: 'kemeny')
         """
         self.retriever = retriever
         self.collection = collection
@@ -66,6 +66,8 @@ class RetrievalPipeline:
                 if DiffPSCAggregator is None:
                     raise ValueError("DiffPSCAggregator is not available. Ensure all dependencies are installed.")
                 self._aggregator = DiffPSCAggregator()
+            elif self.aggregator_name == 'tideman':
+                self._aggregator = TidemanRankedPairsAggregator()
             else:
                 raise ValueError(f"Unknown aggregator: {self.aggregator_name}")
             
