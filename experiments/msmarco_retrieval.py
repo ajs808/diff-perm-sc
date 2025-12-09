@@ -174,9 +174,9 @@ def parse_args():
     parser.add_argument(
         '--aggregator',
         type=str,
-        choices=['kemeny', 'rrf'],
+        choices=['kemeny', 'rrf', 'diff_psc'],
         default='kemeny',
-        help='Aggregation method: kemeny or rrf (default: kemeny)'
+        help='Aggregation method: kemeny, rrf, or diff_psc (default: kemeny)'
     )
     parser.add_argument(
         '--output-dir',
@@ -218,8 +218,8 @@ def main():
         else:
             print(f"Using local index: {args.index_path}")
     
-    # openai_api_key = os.getenv("OPENAI_API_KEY", "")
-    openai_api_key = ""
+    openai_api_key = os.getenv("OPENAI_API_KEY", "")
+    # openai_api_key = ""
     print(f"OpenAI API key set: {bool(openai_api_key)}")
     
     # Load Datasets

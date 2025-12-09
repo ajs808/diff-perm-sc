@@ -9,6 +9,10 @@ from ..llm.prompt_builder import RelevanceRankingPromptBuilder
 from ..llm.prompt_pipeline import OpenAIPromptPipeline
 from ..llm.openai_pool import ChatCompletionPool, OpenAIConfig
 from ..aggregator import KemenyOptimalAggregator, RRFRankAggregator
+try:
+    from ..aggregator import DiffPSCAggregator
+except ImportError:
+    DiffPSCAggregator = None
 from .retrievers import BaseRetriever
 from .datasets import MSMarcoCollection
 
@@ -28,7 +32,7 @@ class RetrievalPipeline:
             collection: MS MARCO collection for retrieving passage text
             llm_config: Optional OpenAI config for LLM reranking. If None or no API key, reranking is skipped.
             num_permutations: Number of permutations for self-consistency (default: 5)
-            aggregator: Aggregation method ('kemeny' or 'rrf', default: 'kemeny')
+            aggregator: Aggregation method ('kemeny', 'rrf', or 'diff_psc', default: 'kemeny')
         """
         self.retriever = retriever
         self.collection = collection
@@ -58,6 +62,10 @@ class RetrievalPipeline:
                 self._aggregator = KemenyOptimalAggregator()
             elif self.aggregator_name == 'rrf':
                 self._aggregator = RRFRankAggregator()
+            elif self.aggregator_name == 'diff_psc':
+                if DiffPSCAggregator is None:
+                    raise ValueError("DiffPSCAggregator is not available. Ensure all dependencies are installed.")
+                self._aggregator = DiffPSCAggregator()
             else:
                 raise ValueError(f"Unknown aggregator: {self.aggregator_name}")
             
