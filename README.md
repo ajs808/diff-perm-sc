@@ -1,6 +1,6 @@
-# MS MARCO Retrieval Pipeline with Permutation Self-Consistency
+# Diff-PSC
 
-A full document retrieval pipeline for MS MARCO dataset that combines initial retrieval (BM25 or SPLADE++) with optional LLM reranking using permutation self-consistency.
+Project members: Arul Saxena
 
 ## Setup
 
@@ -8,7 +8,7 @@ A full document retrieval pipeline for MS MARCO dataset that combines initial re
 
 ```bash
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate 
 ```
 
 ### 2. Install Dependencies
@@ -17,63 +17,71 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 3. Download Pre-built Indexes
+### 3. Download Datasets and Indexes
 
-#### BM25 Index (Pyserini)
+#### MS MARCO Collection
 
-Download the pre-built MS MARCO passage index from Pyserini:
+Download the MS MARCO passage collection and place it at:
+```
+data/msmarco/collection.tsv
+```
 
+Format: tab-separated file with `passage_id\tpassage_text` per line.
+
+#### TREC DL19/20 Datasets
+
+Download TREC Deep Learning 2019/2020 datasets and place them at:
+
+**TREC DL19:**
+- `data/trec-dl19/msmarco-test2019-queries.tsv`
+- `data/trec-dl19/2019qrels-pass.txt`
+
+**TREC DL20:**
+- `data/trec-dl20/msmarco-test2020-queries.tsv`
+- `data/trec-dl20/2020qrels-pass.txt`
+
+#### BM25 Index
+
+**Option 1: Use prebuilt index (recommended)**
+- No download needed. The pipeline will automatically download and cache the index on first use.
+- Specify with `--use-prebuilt-index` (default).
+
+**Option 2: Use local index**
+- Download a prebuilt index from [Pyserini](https://github.com/castorini/pyserini#how-do-i-download-and-use-pre-built-indexes)
+- Extract to a directory (e.g., `indexes/msmarco-passage/`)
+- Specify with `--index-path <path-to-index-directory>`
+
+**Option 3: Build index from collection**
 ```bash
 python -m pyserini.index.lucene \
   --collection JsonCollection \
-  --input <path-to-msmarco-collection> \
+  --input data/msmarco/collection.tsv \
   --index indexes/msmarco-passage \
   --generator DefaultLuceneDocumentGenerator \
   --threads 1 \
   --storePositions --storeDocvectors --storeRaw
 ```
 
-Alternatively, download a pre-built index:
-- Visit: https://github.com/castorini/pyserini#how-do-i-download-and-use-pre-built-indexes
-- Look for "MS MARCO passage" index
-- Download and extract to `indexes/msmarco-passage/`
-
 #### SPLADE++ Index
 
-SPLADE++ embeddings will be built on first run and cached. The model `naver/splade-cocondenser-ensembledistil` will be downloaded automatically from HuggingFace.
+No setup needed. SPLADE++ embeddings are built on first run and cached automatically.
 
 ### 4. Configure API Keys (Optional)
 
-For LLM reranking, create a `.env` file:
-
-```bash
-cp .env.example .env
-# Edit .env and add your API keys
-```
-
-If no API key is provided, the pipeline will skip LLM reranking and only perform initial retrieval.
+Set `OPENAI_API_KEY` environment variable for LLM reranking. If not set, the pipeline will skip LLM reranking and only perform initial retrieval.
 
 ## Usage
 
-See `experiments/msmarco_retrieval.ipynb` for a complete example of running the retrieval pipeline and evaluating on TREC DL19/20 datasets.
+Run the retrieval pipeline:
 
-## Project Structure
+```bash
+python experiments/msmarco_retrieval.py \
+  --retriever bm25 \
+  --aggregator kemeny \
+  --data-dir data \
+  --max-queries 50
+```
 
-- `permsc/retrieval/` - Retrieval pipeline components
-  - `datasets.py` - MS MARCO and TREC dataset loaders
-  - `retrievers.py` - BM25 and SPLADE++ retrievers
-  - `pipeline.py` - Main retrieval pipeline orchestrator
-  - `metrics.py` - NDCG and MRR evaluation metrics
-- `permsc/llm/` - LLM reranking with permutation self-consistency
-- `permsc/aggregator/` - Rank aggregation methods
-- `experiments/` - Jupyter notebooks for experiments
-- `data/` - MS MARCO and TREC datasets
+Available aggregators: `kemeny`, `rrf`, `diff_psc`, `tideman`
 
-## Evaluation
-
-The pipeline evaluates retrieval performance using:
-- **NDCG@k**: Normalized Discounted Cumulative Gain at rank k
-- **MRR**: Mean Reciprocal Rank
-
-Results are computed on TREC DL19 and DL20 query sets with official relevance judgments.
-
+See `experiments/msmarco_retrieval.ipynb` for a complete example.
